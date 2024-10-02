@@ -2,13 +2,17 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_instance" "Demo-server" {
-  ami = "ami-08718895af4dfa033"
+resource "aws_instance" "demo-server" {
+  ami = "ami-0dee22c13ea7a9a67"
   instance_type = "t2.micro"
-  key_name = "Mumbaikey.pem"
+  key_name = "Mumbaikey"
   //security_groups = ["Demo-sg"]
   vpc_security_group_ids = [aws_security_group.Demo-sg.id]
   subnet_id = aws_subnet.demo-public-subnet-01.id
+  for_each = toset(["jenkins-Server","maven-Server","anisble-server"])
+  tags = {
+    Name = "${each.key}"
+  }
 }
 
 resource "aws_security_group" "Demo-sg" {
@@ -36,7 +40,7 @@ resource "aws_security_group" "Demo-sg" {
 }
 
 resource "aws_vpc" "demo-vpc" {
-  cidr_block = ["10.1.0.0/16"]
+  cidr_block = "10.1.0.0/16"
   tags = {
     Name = "demo-vpc"
   }
@@ -77,12 +81,12 @@ resource "aws_route_table" "demo-public-rt" {
   }
 }
 
-resource "aws_route_association" "demo-rt-public-subnet-01" {
+resource "aws_route_table_association" "demo-rta-public-subnet-01" {
   subnet_id = aws_subnet.demo-public-subnet-01.id
   route_table_id = aws_route_table.demo-public-rt.id
 }
 
-resource "aws_route_association" "demo-rt-public-subnet-02" {
+resource "aws_route_table_association" "demo-rta-public-subnet-02" {
   subnet_id = aws_subnet.demo-public-subnet-02.id
   route_table_id = aws_route_table.demo-public-rt.id
 }
